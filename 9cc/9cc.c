@@ -20,7 +20,7 @@ struct Token{
   Token *next;    // next token
   int val;        // if kind is TK_NUM, input number
   char *str;      // token str
-  int len;
+  int len;        // token length
 };
 
 // current token
@@ -53,9 +53,12 @@ void error_at(char *loc, char *fmt, ...){
 
 // if next token is symbol, read next token and return true
 // otherwise return false
-bool consume(char op){
-  if (token->kind != TK_RESERVED || token ->str[0] != op)
+bool consume(char *op) {
+  if (token->kind != TK_RESERVED ||
+      strlen(op) != token->len || 
+      memcmp(token->str, op, token->len)){
     return false;
+  }
   token = token->next;
   return true;
 }
@@ -84,12 +87,31 @@ bool at_eof(){
 }
 
 // make new token, and add new token to cur
-Token *new_token(TokenKind kind, Token *cur, char *str){
+Token *new_token(TokenKind kind, Token *cur, char *str, int len){
   Token *tok = calloc(1, sizeof(Token));
   tok -> kind = kind;
   tok -> str = str;
+  // set token length, if it is '==', then 2
+  tok -> len = len;
   cur -> next = tok;
   return tok;
+}
+
+// for tokenize
+bool issymbol(char *p){
+  bool result = 
+    *p == '+' || *p == '-' || *p == '*' || 
+    *p == '/' || *p == '(' || *p == ')' ||
+    *p == '<' || *p == '>';
+  return result;
+}
+
+bool isdouble_symbol(char *p){
+  bool result =
+    strncmp(p, "<=", 2) == 0 || strncmp(p, ">=", 2) == 0 ||
+    strncmp(p, "==", 2) == 0 || strncmp(p, "!=", 2) == 0;
+
+  return result;
 }
 
 // return tokenized p which is inputed 
@@ -105,14 +127,22 @@ Token *tokenize(char *p) {
       continue;
     }
 
-    if(*p == '+' || *p == '-' || *p == '*' || 
-       *p == '/' || *p == '(' || *p == ')'){
-      cur = new_token(TK_RESERVED, cur, p++);
+    if(isdouble_symbol(p)){
+      cur = new_token(TK_RESERVED, cur, p, 2);
+      // skip double_symbol ex).' == '
+      p+=2;
+      continue;
+    }
+
+    if(issymbol(p)){
+      cur = new_token(TK_RESERVED, cur, p, 1);
+      // skip symbol ex).' > '
+      p+=1;
       continue;
     }
 
     if(isdigit(*p)){
-      cur = new_token(TK_NUM, cur, p);
+      cur = new_token(TK_NUM, cur, p, 1);
       cur->val = strtol(p, &p, 10);
       continue;
     }
@@ -120,17 +150,23 @@ Token *tokenize(char *p) {
     error("doesn't tokenize");
   }
 
-  new_token(TK_EOF, cur, p);
+  new_token(TK_EOF, cur, p, 0);
   return head.next;
 }
 
 // defined syntax tree's node
 typedef enum{
-  ND_ADD,  // +
-  ND_SUB,  // -
-  ND_MUL,  // *
-  ND_DIV,  // /
-  ND_NUM,  // number
+  ND_EQ,     // ==
+  ND_NOT_EQ, // !=
+  ND_LT,     // <
+  ND_LT_EQ,  // <=
+  ND_RT,     // >
+  ND_RT_EQ,  // >=
+  ND_ADD,    // +
+  ND_SUB,    // -
+  ND_MUL,    // *
+  ND_DIV,    // /
+  ND_NUM,    // number
 } NodeKind;
 
 typedef struct Node Node;
@@ -145,6 +181,9 @@ struct Node{
 
 // proto type
 Node *expr();
+Node *equality();
+Node *relational();
+Node *add();
 Node *mul();
 Node *term();
 Node *unary();
@@ -165,12 +204,47 @@ Node *new_node_num(int val){
 }
 
 Node *expr() {
-  Node *node = mul();
+  Node *node = equality();
 
+  return node;
+}
+
+Node *equality() {
+  Node *node = relational();
   for (;;) {
-    if (consume('+'))
+    if (consume("=="))
+      node = new_node(ND_EQ, node, relational());
+    else if (consume("!="))
+      node = new_node(ND_NOT_EQ, node, relational());
+    else
+      return node;
+  }
+
+  return node;
+}
+
+Node *relational() {
+  Node *node = add();
+  for (;;) {
+    if (consume("<"))
+      node = new_node(ND_LT, node, add());
+    else if (consume("<="))
+      node = new_node(ND_LT_EQ, node, add());
+    else if (consume(">"))
+      node = new_node(ND_RT, node, add());
+    else if (consume(">="))
+      node = new_node(ND_RT_EQ, node, add());
+    else
+      return node;
+  }
+}
+
+Node *add() {
+  Node *node = mul();
+  for (;;) {
+    if (consume("+"))
       node = new_node(ND_ADD, node, mul());
-    else if (consume('-'))
+    else if (consume("-"))
       node = new_node(ND_SUB, node, mul());
     else
       return node;
@@ -179,11 +253,10 @@ Node *expr() {
 
 Node *mul() {
   Node *node = unary();
-
   for (;;) {
-    if (consume('*'))
+    if (consume("*"))
       node = new_node(ND_MUL, node, unary());
-    else if (consume('/'))
+    else if (consume("/"))
       node = new_node(ND_DIV, node, unary());
     else
       return node;
@@ -191,15 +264,15 @@ Node *mul() {
 }
 
 Node *unary(){
-  if (consume('+'))
+  if (consume("+"))
     return term();
-  if (consume('-'))
+  if (consume("-"))
     return new_node(ND_SUB, new_node_num(0), term());
   return term();
 }
 
 Node *term() {
-  if (consume('(')) {
+  if (consume("(")) {
     Node *node = expr();
     expect(')');
     return node;
@@ -233,6 +306,36 @@ void gen(Node *node){
   case ND_DIV:
     printf("  cqo\n");
     printf("  idiv rdi\n");
+    break;
+  case ND_EQ:
+    printf("  cmp rax, rdi\n");
+    printf("  sete al\n");
+    printf("  movzb rax, al\n");
+    break;
+  case ND_NOT_EQ:
+    printf("  cmp rax, rdi\n");
+    printf("  setne al\n");
+    printf("  movzb rax, al\n");
+    break;
+  case ND_LT:
+    printf("  cmp rax, rdi\n");
+    printf("  setl al\n");
+    printf("  movzb rax, al\n");
+    break;
+  case ND_LT_EQ:
+    printf("  cmp rax, rdi\n");
+    printf("  setle al\n");
+    printf("  movzb rax, al\n");
+    break;
+  case ND_RT:
+    printf("  cmp rdi, rax\n");
+    printf("  setl al\n");
+    printf("  movzb rax, al\n");
+    break;
+  case ND_RT_EQ:
+    printf("  cmp rdi, rax\n");
+    printf("  setle al\n");
+    printf("  movzb rax, al\n");
     break;
   }
 
