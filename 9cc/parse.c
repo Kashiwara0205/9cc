@@ -1,27 +1,4 @@
-#include <ctype.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-// defind token
-typedef enum{
-  TK_RESERVED,   // symbol
-  TK_NUM,        // number
-  TK_EOF,        // end of token
-} TokenKind;
-
-typedef struct Token Token;
-
-// token type
-struct Token{
-  TokenKind kind; // token kind
-  Token *next;    // next token
-  int val;        // if kind is TK_NUM, input number
-  char *str;      // token str
-  int len;        // token length
-};
+#include "9cc.h"
 
 // current token
 Token *token;
@@ -34,8 +11,6 @@ void error(char *fmt, ...){
   fprintf(stderr, "\n");
   exit(1);
 }
-
-char *user_input;
 
 void error_at(char *loc, char *fmt, ...){
   va_list ap;
@@ -154,39 +129,7 @@ Token *tokenize(char *p) {
   return head.next;
 }
 
-// defined syntax tree's node
-typedef enum{
-  ND_EQ,     // ==
-  ND_NOT_EQ, // !=
-  ND_LT,     // <
-  ND_LT_EQ,  // <=
-  ND_RT,     // >
-  ND_RT_EQ,  // >=
-  ND_ADD,    // +
-  ND_SUB,    // -
-  ND_MUL,    // *
-  ND_DIV,    // /
-  ND_NUM,    // number
-} NodeKind;
-
-typedef struct Node Node;
-
-// node type
-struct Node{
-  NodeKind kind;  // node kind
-  Node *lhs;      // left side
-  Node *rhs;      // right side
-  int val;        // if kind is ND_NUM, input number
-};
-
-// proto type
-Node *expr();
-Node *equality();
-Node *relational();
-Node *add();
-Node *mul();
-Node *term();
-Node *unary();
+// proto type declaration
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
   Node *node = calloc(1, sizeof(Node));
@@ -279,91 +222,4 @@ Node *term() {
   }
 
   return new_node_num(expect_number());
-}
-
-void gen(Node *node){
-  if (node->kind == ND_NUM){
-    printf("  push %d\n", node->val);
-    return;
-  }
-
-  gen(node->lhs);
-  gen(node->rhs);
-
-  printf("  pop rdi\n");
-  printf("  pop rax\n");
-
-  switch (node->kind){
-  case ND_ADD:
-    printf("  add rax, rdi\n");
-    break;
-  case ND_SUB:
-    printf("  sub rax, rdi\n");
-    break;
-  case ND_MUL:
-    printf("  imul rax, rdi\n");
-    break;
-  case ND_DIV:
-    printf("  cqo\n");
-    printf("  idiv rdi\n");
-    break;
-  case ND_EQ:
-    printf("  cmp rax, rdi\n");
-    printf("  sete al\n");
-    printf("  movzb rax, al\n");
-    break;
-  case ND_NOT_EQ:
-    printf("  cmp rax, rdi\n");
-    printf("  setne al\n");
-    printf("  movzb rax, al\n");
-    break;
-  case ND_LT:
-    printf("  cmp rax, rdi\n");
-    printf("  setl al\n");
-    printf("  movzb rax, al\n");
-    break;
-  case ND_LT_EQ:
-    printf("  cmp rax, rdi\n");
-    printf("  setle al\n");
-    printf("  movzb rax, al\n");
-    break;
-  case ND_RT:
-    printf("  cmp rdi, rax\n");
-    printf("  setl al\n");
-    printf("  movzb rax, al\n");
-    break;
-  case ND_RT_EQ:
-    printf("  cmp rdi, rax\n");
-    printf("  setle al\n");
-    printf("  movzb rax, al\n");
-    break;
-  }
-
-  printf("  push rax\n");
-}
-
-int main(int argc, char **argv){
-  if (argc != 2){
-    fprintf(stderr, "mismatch numbers of argument\n");
-    return 1;
-  }
-
-  // tokenize
-  user_input = argv[1];
-  token = tokenize(user_input);
-  Node *node = expr();
-
-  // out put assembler
-  printf(".intel_syntax noprefix\n");
-  printf(".global main\n");
-  printf("main:\n");
-
-  // syntax tree
-  gen(node);
-
-  // pop calculation result, and return
-  printf("  pop rax\n");
-  printf("  ret\n");
-
-  return 0;
 }
