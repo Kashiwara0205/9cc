@@ -11,6 +11,7 @@ extern char *user_input;
 // defind token
 typedef enum{
   TK_RESERVED,   // symbol
+  TK_IDENT,      // identifier
   TK_NUM,        // number
   TK_EOF,        // end of token
 } TokenKind;
@@ -31,7 +32,7 @@ extern Token *token;
 
 // proto type decration for Token
 Token *new_token(TokenKind kind, Token *cur, char *str, int len);
-Token *tokenize(char *p);
+Token *tokenize();
 
 // defined syntax tree's node
 typedef enum{
@@ -45,6 +46,8 @@ typedef enum{
   ND_SUB,    // -
   ND_MUL,    // *
   ND_DIV,    // /
+  ND_ASSIGN, // =
+  ND_LVAR,   // local variable
   ND_NUM,    // number
 } NodeKind;
 
@@ -55,7 +58,8 @@ struct Node{
   NodeKind kind;  // node kind
   Node *lhs;      // left side
   Node *rhs;      // right side
-  int val;        // if kind is ND_NUM, input number
+  int val;        // if kind is ND_NUM, only use
+  int offset;     // if kind is ND_LVAR, only use
 };
 
 // proto type decration for Node
@@ -66,4 +70,17 @@ Node *add();
 Node *mul();
 Node *term();
 Node *unary();
+Node *assign();
+Node *stmt();
+
 void gen(Node *node);
+
+// for error
+void error(char *fmt, ...);
+void error_at(char *loc, char *fmt, ...);
+
+// Use one per semicolon
+// for example a; 1+1; → [0]: a [1]: 1+1
+Node *code[100];
+
+void program();

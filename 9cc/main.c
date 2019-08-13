@@ -4,6 +4,7 @@
 char *user_input = NULL;
 
 int main(int argc, char **argv){
+
   if (argc != 2){
     fprintf(stderr, "mismatch numbers of argument\n");
     return 1;
@@ -11,20 +12,32 @@ int main(int argc, char **argv){
 
   // tokenize
   user_input = argv[1];
-  token = tokenize(user_input);
-  Node *node = expr();
+
+  tokenize();
+  program();
 
   // out put assembler
   printf(".intel_syntax noprefix\n");
   printf(".global main\n");
   printf("main:\n");
 
-  // syntax tree
-  gen(node);
+  // prologue
+  // get 26 variable's area
+  printf("  push rbp\n");
+  printf("  mov rbp, rsp\n");
+  printf("  sub rsp, 208\n");
 
-  // pop calculation result, and return
-  printf("  pop rax\n");
+  for (int i = 0; code[i]; i++) {
+    // use syntax tree to generate code
+    gen(code[i]);
+    printf("  pop rax\n");
+  }
+
+  // epilogue
+  printf("  mov rsp, rbp\n");
+  printf("  pop rbp\n");
   printf("  ret\n");
+
 
   return 0;
 }
