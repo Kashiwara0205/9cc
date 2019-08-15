@@ -33,6 +33,7 @@ extern Token *token;
 // proto type decration for Token
 Token *new_token(TokenKind kind, Token *cur, char *str, int len);
 Token *tokenize();
+Token *consume_ident();
 
 // for local variable type
 typedef struct LVar LVar;

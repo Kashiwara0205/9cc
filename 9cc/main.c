@@ -10,19 +10,17 @@ int main(int argc, char **argv){
     return 1;
   }
 
-  // tokenize
   user_input = argv[1];
-
+  // run tokenize in token.c for tokenize
   tokenize();
+  // run program in node.c for parsing
   program();
 
-  // out put assembler
   printf(".intel_syntax noprefix\n");
   printf(".global main\n");
   printf("main:\n");
 
-  // prologue
-  // get 26 variable's area
+  // prologue get 26 variable's area
   printf("  push rbp\n");
   printf("  mov rbp, rsp\n");
   printf("  sub rsp, 208\n");
