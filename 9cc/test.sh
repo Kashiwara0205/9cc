@@ -63,4 +63,5 @@ try 40 "test1 = 20; test2=20; test1 + test2;"
 # whether 'return parsing' works
 try 1 "return 1;"
 try 5 "i = 5; return i;"
+try 10 "i = 10; return i; 1;"
 echo OK
