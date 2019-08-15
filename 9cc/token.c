@@ -40,10 +40,16 @@ bool is_lowercase_alpha(char *p){
   return result;
 }
 
+bool is_variable_parts(char *p){
+  bool result = ('a' <= *p && *p <= 'z') || ('0' <= *p && *p <= '9') || ('_' == *p);
+
+  return result;  
+}
+
 int get_variable_offset(char *p){
   int variable_length = 0;
   char *current_position = p;
-  while(is_lowercase_alpha(p)){
+  while(is_variable_parts(p)){
     variable_length += 1;
     p += 1;
   }
