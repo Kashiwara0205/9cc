@@ -9,6 +9,7 @@ bool consume(char *op) {
     return false;
   }
   token = token->next;
+
   return true;
 }
 
@@ -18,12 +19,24 @@ Token *consume_ident() {
   if (token->kind != TK_IDENT)
     return false;
   Token *ident_token;
-
   // copy ident_token address 
   ident_token = token;
   token = token->next;
 
   return ident_token;
+}
+
+// if next token is return, read next token and return true
+// otherwise return false
+bool consume_return() {
+  if (token->kind != TK_RETURN ||
+      strlen("return") != token->len || 
+      memcmp(token->str, "return", 6)){
+    return false;
+  }
+  token = token->next;
+
+  return true;
 }
 
 // if next token is symbol, read next token
@@ -72,7 +85,16 @@ Node *new_node_num(int val){
 }
 
 Node *stmt() {
-  Node *node = expr();
+  Node *node;
+
+  if(consume_return()){
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_RETURN;     
+    node->lhs = expr();
+  }else{
+   node = expr();
+  }
+
   expect(';');
   return node;
 }

@@ -59,4 +59,8 @@ try 100 "ab = 50; dc=50; ab + dc;"
 # whether 'complex local variable parsing' works
 try 20 "test_val = 20;"
 try 40 "test1 = 20; test2=20; test1 + test2;"
+
+# whether 'return parsing' works
+try 1 "return 1;"
+try 5 "i = 5; return i;"
 echo OK
