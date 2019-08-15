@@ -2,6 +2,8 @@
 
 // current token
 Token *token;
+// current variable
+LVar *locals;
 
 // if next token is symbol, read next token and return true
 // otherwise return false
@@ -84,6 +86,18 @@ bool is_lowercase_alpha(char *p){
   return result;
 }
 
+int get_variable_offset(char *p){
+  int variable_length = 0;
+  char *current_position = p;
+  while(is_lowercase_alpha(p)){
+    variable_length += 1;
+    p += 1;
+  }
+  p = current_position;
+
+  return variable_length;
+}
+
 // return tokenized p which is inputed 
 Token *tokenize() {
   Token head;
@@ -117,8 +131,16 @@ Token *tokenize() {
     }
 
     if (is_lowercase_alpha(user_input)) {
-      cur = new_token(TK_IDENT, cur, user_input, 1);
-      user_input+=1;
+      // memo:
+      // token structure, when register variable token
+      // | hoge | = 1 
+      // variable_length: 4
+      // after add offset to user_input 
+      //  = 1
+      int offset = get_variable_offset(user_input);
+      cur = new_token(TK_IDENT, cur, user_input, offset);
+
+      user_input += offset;
       continue;
     }
 
@@ -129,7 +151,12 @@ Token *tokenize() {
   token = head.next;
 }
 
-// proto type declaration
+LVar *find_lvar(Token *tok){
+  for (LVar *var = locals; var; var = var->next)
+    if(var->len == tok->len && !memcmp(tok->str, var->name, var->len))
+      return var;
+    return NULL;
+}
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
   Node *node = calloc(1, sizeof(Node));
@@ -230,11 +257,25 @@ Node *term() {
   if (tok) {
     Node *node = calloc(1, sizeof(Node));
     node->kind = ND_LVAR;
-    node->offset = (tok->str[0] - 'a' + 1) * 8;
-
+    LVar *lvar = find_lvar(tok);
+    if (lvar) {
+      node->offset = lvar->offset;
+    } else {
+      // save local variable
+      lvar = calloc(1, sizeof(LVar));
+      lvar->next = locals;
+      lvar->name = tok->str;
+      lvar->len = tok->len;
+      if (locals == NULL){
+        lvar->offset = 8;
+      }else{
+        lvar->offset = locals->offset + 8;
+      }
+      node->offset = lvar->offset;
+      locals = lvar;
+    }
     return node;
   }
-  
 
   if (consume("(")) {
     Node *node = expr();

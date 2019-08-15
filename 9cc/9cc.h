@@ -34,6 +34,19 @@ extern Token *token;
 Token *new_token(TokenKind kind, Token *cur, char *str, int len);
 Token *tokenize();
 
+// for local variable type
+typedef struct LVar LVar;
+
+struct LVar{
+  LVar *next;  // next valirable is nil
+  char *name;  // variable's name
+  int len;     // variable's length
+  int offset;  // offset from RBP(register base pointer)
+};
+
+// local variable
+extern LVar *locals;
+
 // defined syntax tree's node
 typedef enum{
   ND_EQ,     // ==
