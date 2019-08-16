@@ -41,15 +41,16 @@ bool is_lowercase_alpha(char *p){
   return result;
 }
 
-bool is_variable_parts(char *p){
-  bool result = ('a' <= *p && *p <= 'z') || 
-                ('0' <= *p && *p <= '9') || 
-                ('_' == *p);
+bool is_variable(char *p){
+  bool result = 
+    ('a' <= *p && *p <= 'z') || 
+    ('0' <= *p && *p <= '9') || 
+    ('_' == *p);
 
-  return result;  
+  return result;
 }
 
-int is_alnum(char c) {
+bool is_alnum(char c) {
   bool result = 
     ('a' <= c && c <= 'z') ||
     ('A' <= c && c <= 'Z') ||
@@ -59,10 +60,20 @@ int is_alnum(char c) {
   return result;
 }
 
+bool is_return(char *p){
+  // '!is_alnum(user_input[6])' block case, for example returnx, return_1
+  return strncmp(p, "return", 6) == 0 && !is_alnum(p[6]);
+}
+
+bool is_if(char *p){
+  // '!is_alnum(user_input[2])' block case, for example ifx, if_1
+  return strncmp(p, "if", 2) == 0 && !is_alnum(p[2]);
+}
+
 int get_variable_offset(char *p){
   int variable_length = 0;
   char *current_position = p;
-  while(is_variable_parts(p)){
+  while(is_variable(p)){
     variable_length += 1;
     p += 1;
   }
@@ -103,10 +114,15 @@ Token *tokenize() {
       continue;
     }
 
-    // '!is_alnum(user_input[6])' block case, for example returnx, return_1
-    if (strncmp(user_input, "return", 6) == 0 && !is_alnum(user_input[6])) {
+    if(is_return(user_input)) {
       cur = new_token(TK_RETURN, cur, user_input, 6);
       user_input+=6;
+      continue;
+    }
+
+    if(is_if(user_input)){
+      cur = new_token(TK_IF, cur, user_input, 2);
+      user_input+=2;
       continue;
     }
 

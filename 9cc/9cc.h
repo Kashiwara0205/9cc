@@ -15,6 +15,7 @@ typedef enum{
   TK_NUM,        // number
   TK_EOF,        // end of token
   TK_RETURN,     // return
+  TK_IF,         // if
 } TokenKind;
 
 typedef struct Token Token;
@@ -65,17 +66,20 @@ typedef enum{
   ND_LVAR,   // local variable
   ND_NUM,    // number
   ND_RETURN, // return
+  ND_IF,     // if
 } NodeKind;
 
 typedef struct Node Node;
 
 // node type
 struct Node{
-  NodeKind kind;  // node kind
-  Node *lhs;      // left side
-  Node *rhs;      // right side
-  int val;        // if kind is ND_NUM, only use
-  int offset;     // if kind is ND_LVAR, only use
+  NodeKind kind;     // node kind
+  Node *lhs;         // left side
+  Node *rhs;         // right side
+  int val;           // if kind is ND_NUM, only use
+  int offset;        // if kind is ND_LVAR, only use
+  Node *conditional; // if kind is ND_IF, only use
+  Node *content;     // if kind is ND_IF, only use
 };
 
 // proto type decration for Node

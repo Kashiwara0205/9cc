@@ -64,4 +64,9 @@ try 40 "test1 = 20; test2=20; test1 + test2;"
 try 1 "return 1;"
 try 5 "i = 5; return i;"
 try 10 "i = 10; return i; 1;"
+
+# whether 'if parsing' works
+try 1 "if(1) return 1;"
+try 2 "if(0) return 1; 2;"
+
 echo OK

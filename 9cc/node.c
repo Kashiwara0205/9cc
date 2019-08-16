@@ -2,8 +2,8 @@
 
 // if next token is symbol, read next token and return true
 // otherwise return false
-bool consume(char *op) {
-  if (token->kind != TK_RESERVED ||
+bool consume(char *op, int token_kind) {
+  if (token->kind != token_kind ||
       strlen(op) != token->len || 
       memcmp(token->str, op, token->len)){
     return false;
@@ -24,19 +24,6 @@ Token *consume_ident() {
   token = token->next;
 
   return ident_token;
-}
-
-// if next token is return, read next token and return true
-// otherwise return false
-bool consume_return() {
-  if (token->kind != TK_RETURN ||
-      strlen("return") != token->len || 
-      memcmp(token->str, "return", 6)){
-    return false;
-  }
-  token = token->next;
-
-  return true;
 }
 
 // if next token is symbol, read next token
@@ -79,20 +66,25 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 
 Node *new_node_num(int val){
   Node *node = calloc(1, sizeof(Node));
-  node -> kind = ND_NUM;
-  node -> val = val;
+  node->kind = ND_NUM;
+  node->val = val;
   return node;
 }
 
 Node *stmt() {
-  Node *node;
+  Node *node = calloc(1, sizeof(Node));
 
-  if(consume_return()){
-    node = calloc(1, sizeof(Node));
-    node->kind = ND_RETURN;     
-    node->lhs = expr();
+  if(consume("return", TK_RETURN)){
+    node = new_node(ND_RETURN, NULL, expr());
+  }else if(consume("if", TK_IF)){
+    expect('(');
+    node->conditional = expr();
+    expect(')');
+    node->content = stmt();
+    node->kind = ND_IF;
+    return node;
   }else{
-   node = expr();
+    node = expr();
   }
 
   expect(';');
@@ -100,12 +92,15 @@ Node *stmt() {
 }
 
 Node *expr() {
-  return assign();
+  Node *node;
+  node = assign();
+
+  return node;
 }
 
 Node *assign() {
   Node *node = equality();
-  if (consume("="))
+  if (consume("=", TK_RESERVED))
     node = new_node(ND_ASSIGN, node, assign());
   return node;
 }
@@ -113,9 +108,9 @@ Node *assign() {
 Node *equality() {
   Node *node = relational();
   for (;;) {
-    if (consume("=="))
+    if (consume("==", TK_RESERVED))
       node = new_node(ND_EQ, node, relational());
-    else if (consume("!="))
+    else if (consume("!=", TK_RESERVED))
       node = new_node(ND_NOT_EQ, node, relational());
     else
       return node;
@@ -127,13 +122,13 @@ Node *equality() {
 Node *relational() {
   Node *node = add();
   for (;;) {
-    if (consume("<"))
+    if (consume("<", TK_RESERVED))
       node = new_node(ND_LT, node, add());
-    else if (consume("<="))
+    else if (consume("<=", TK_RESERVED))
       node = new_node(ND_LT_EQ, node, add());
-    else if (consume(">"))
+    else if (consume(">", TK_RESERVED))
       node = new_node(ND_RT, node, add());
-    else if (consume(">="))
+    else if (consume(">=", TK_RESERVED))
       node = new_node(ND_RT_EQ, node, add());
     else
       return node;
@@ -143,9 +138,9 @@ Node *relational() {
 Node *add() {
   Node *node = mul();
   for (;;) {
-    if (consume("+"))
+    if (consume("+", TK_RESERVED))
       node = new_node(ND_ADD, node, mul());
-    else if (consume("-"))
+    else if (consume("-", TK_RESERVED))
       node = new_node(ND_SUB, node, mul());
     else
       return node;
@@ -155,9 +150,9 @@ Node *add() {
 Node *mul() {
   Node *node = unary();
   for (;;) {
-    if (consume("*"))
+    if (consume("*", TK_RESERVED))
       node = new_node(ND_MUL, node, unary());
-    else if (consume("/"))
+    else if (consume("/", TK_RESERVED))
       node = new_node(ND_DIV, node, unary());
     else
       return node;
@@ -165,9 +160,9 @@ Node *mul() {
 }
 
 Node *unary(){
-  if (consume("+"))
+  if (consume("+", TK_RESERVED))
     return term();
-  if (consume("-"))
+  if (consume("-", TK_RESERVED))
     return new_node(ND_SUB, new_node_num(0), term());
   return term();
 }
@@ -197,7 +192,7 @@ Node *term() {
     return node;
   }
 
-  if (consume("(")) {
+  if (consume("(", TK_RESERVED)) {
     Node *node = expr();
     expect(')');
     return node;
