@@ -61,14 +61,20 @@ bool is_alnum(char c) {
 }
 
 bool is_return(char *p){
-  // '!is_alnum(user_input[6])' block case, for example returnx, return_1
+  // '!is_alnum(p[6])' block case, for example returnx, return_1
   return strncmp(p, "return", 6) == 0 && !is_alnum(p[6]);
 }
 
 bool is_if(char *p){
-  // '!is_alnum(user_input[2])' block case, for example ifx, if_1
+  // '!is_alnum(p[2])' block case, for example ifx, if_1
   return strncmp(p, "if", 2) == 0 && !is_alnum(p[2]);
 }
+
+bool is_while(char *p){
+  // '!is_alnum(p[5])' block case, for example whilex, while_1
+  return strncmp(p, "while", 5) == 0 && !is_alnum(p[5]);
+}
+
 
 int get_variable_offset(char *p){
   int variable_length = 0;
@@ -123,6 +129,12 @@ Token *tokenize() {
     if(is_if(user_input)){
       cur = new_token(TK_IF, cur, user_input, 2);
       user_input+=2;
+      continue;
+    }
+
+    if(is_while(user_input)){
+      cur = new_token(TK_WHILE, cur, user_input, 5);
+      user_input+=5;
       continue;
     }
 

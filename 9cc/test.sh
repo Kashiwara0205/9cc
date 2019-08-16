@@ -68,5 +68,10 @@ try 10 "i = 10; return i; 1;"
 # whether 'if parsing' works
 try 1 "if(1) return 1;"
 try 2 "if(0) return 1; 2;"
+try 1 "if(1 < 0) return 3; return 1;"
+
+# whether 'while parsing' works
+try 1 "while(1 < 0) return 3; return 1;"
+try 5 "i = 0; while(5 > i) i = i + 1; return i;"
 
 echo OK
