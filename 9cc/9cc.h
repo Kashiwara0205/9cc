@@ -16,6 +16,7 @@ typedef enum{
   TK_EOF,        // end of token
   TK_RETURN,     // return
   TK_IF,         // if
+  TK_ELSE,       // else
   TK_WHILE,      // while
 } TokenKind;
 
@@ -68,6 +69,7 @@ typedef enum{
   ND_NUM,    // number
   ND_RETURN, // return
   ND_IF,     // if
+  ND_ELSE,   // else
   ND_WHILE,  // while
 } NodeKind;
 
@@ -75,13 +77,14 @@ typedef struct Node Node;
 
 // node type
 struct Node{
-  NodeKind kind;     // node kind
-  Node *lhs;         // left side
-  Node *rhs;         // right side
-  int val;           // if kind is ND_NUM, only use
-  int offset;        // if kind is ND_LVAR, only use
-  Node *conditional; // if kind is ND_IF, only use
-  Node *content;     // if kind is ND_IF, only use
+  NodeKind kind;      // node kind
+  Node *lhs;          // left side
+  Node *rhs;          // right side
+  int val;            // if kind is ND_NUM, only use
+  int offset;         // if kind is ND_LVAR, only use
+  Node *conditional;  // if kind is ND_IF, only use
+  Node *content;      // if kind is ND_IF, only use
+  Node *else_content; // if kind is ND_ELSE, only use
 };
 
 // proto type decration for Node

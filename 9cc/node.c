@@ -81,7 +81,14 @@ Node *stmt() {
     node->conditional = expr();
     expect(')');
     node->content = stmt();
-    node->kind = ND_IF;
+
+    if(consume("else", TK_ELSE)){
+      node->kind = ND_ELSE;
+      node->else_content = stmt();
+    }else{
+      node->kind = ND_IF;
+    }
+
     return node;
   }else if(consume("while", TK_WHILE)){
     expect('(');

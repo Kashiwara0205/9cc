@@ -70,11 +70,15 @@ bool is_if(char *p){
   return strncmp(p, "if", 2) == 0 && !is_alnum(p[2]);
 }
 
+bool is_else(char *p){
+  // '!is_alnum(p[2])' block case, for example elsex, else_1
+  return strncmp(p, "else", 4) == 0 && !is_alnum(p[4]);
+}
+
 bool is_while(char *p){
   // '!is_alnum(p[5])' block case, for example whilex, while_1
   return strncmp(p, "while", 5) == 0 && !is_alnum(p[5]);
 }
-
 
 int get_variable_offset(char *p){
   int variable_length = 0;
@@ -129,6 +133,12 @@ Token *tokenize() {
     if(is_if(user_input)){
       cur = new_token(TK_IF, cur, user_input, 2);
       user_input+=2;
+      continue;
+    }
+
+    if(is_else(user_input)){
+      cur = new_token(TK_ELSE, cur, user_input, 4);
+      user_input+=4;
       continue;
     }
 
