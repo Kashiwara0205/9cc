@@ -34,6 +34,7 @@ void gen(Node *node){
   case ND_IF:
     gen(node->conditional);
     printf("  pop rax\n");
+    //printf("  not rax\n");
     printf("  cmp rax, 0\n");
     printf("  je .Lend%d\n", lend_num);
     gen(node->content);
@@ -45,6 +46,28 @@ void gen(Node *node){
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
     printf("  je .Lelse%d\n", lelse_num);
+    gen(node->content);
+    printf("  jmp .Lend%d\n", lend_num);
+    printf(".Lelse%d:\n", lelse_num);
+    gen(node->else_content);
+    printf(".Lend%d:\n", lend_num);
+    lelse_num+=1;
+    lend_num+=1;
+    return;
+  case ND_UNLESS:
+    gen(node->conditional);
+    printf("  pop rax\n");
+    printf("  cmp rax, 0\n");
+    printf("  jne .Lend%d\n", lend_num);
+    gen(node->content);
+    printf(".Lend%d:\n", lend_num);
+    lend_num+=1;
+    return;
+  case ND_UNLESS_ELSE:
+    gen(node->conditional);
+    printf("  pop rax\n");
+    printf("  cmp rax, 0\n");
+    printf("  jne .Lelse%d\n", lelse_num);
     gen(node->content);
     printf("  jmp .Lend%d\n", lend_num);
     printf(".Lelse%d:\n", lelse_num);
@@ -91,7 +114,7 @@ void gen(Node *node){
     if(node->conditional){
       printf(".Lend%d:\n", lend_num);
     }
-    
+
     lbegin_num+=1;
     lend_num+=1;
     return;

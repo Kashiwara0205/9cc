@@ -83,5 +83,13 @@ try 5 "test = 0; for(i=0; 5>i; i=i+1) test=test+1; return test;"
 try 5 "test = 0; for(;5>test;) test=test+1; return test;"
 try 5 "test = 0; for(i=0; ; i=i+1) if(i > 4) return i;"
 
+# whether 'unless parsing' works
+try 1 "unless(0) return 1;"
+try 2 "unless(1) return 1; 2;"
+try 1 "unless(1 > 0) return 3; return 1;"
+
+# wheather 'else(unless) parsing' works
+try 2 "unless(1) 1; else 2;"
+try 1 "unless(0) 1; else 2;"
 
 echo OK

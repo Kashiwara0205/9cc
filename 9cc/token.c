@@ -85,6 +85,11 @@ bool is_for(char *p){
   return strncmp(p, "for", 3) == 0 && !is_alnum(p[3]);
 }
 
+bool is_unless(char *p){
+  // '!is_alnum(p[6])' block case, for example unlessx, unless_1
+  return strncmp(p, "unless", 6) == 0 && !is_alnum(p[6]);
+}
+
 int get_variable_offset(char *p){
   int variable_length = 0;
   char *current_position = p;
@@ -156,6 +161,12 @@ Token *tokenize() {
     if(is_for(user_input)){
       cur = new_token(TK_FOR, cur, user_input, 3);
       user_input+=3;
+      continue;
+    }
+
+    if(is_unless(user_input)){
+      cur = new_token(TK_UNLESS, cur, user_input, 6);
+      user_input+=6;
       continue;
     }
 

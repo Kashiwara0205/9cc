@@ -87,12 +87,26 @@ Node *stmt() {
     node->conditional = expr();
     expect(')');
     node->content = stmt();
-    
+
     if(consume("else", TK_ELSE)){
       node->kind = ND_ELSE;
       node->else_content = stmt();
     }else{
       node->kind = ND_IF;
+    }
+
+    return node;
+  }else if(consume("unless", TK_UNLESS)){
+    expect('(');
+    node->conditional = expr();
+    expect(')');
+    node->content = stmt();
+
+    if(consume("else", TK_ELSE)){
+      node->kind = ND_UNLESS_ELSE;
+      node->else_content = stmt();
+    }else{
+      node->kind = ND_UNLESS;
     }
 
     return node;
