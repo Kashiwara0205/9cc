@@ -80,6 +80,11 @@ bool is_while(char *p){
   return strncmp(p, "while", 5) == 0 && !is_alnum(p[5]);
 }
 
+bool is_for(char *p){
+  // '!is_alnum(p[3])' block case, for example forx, for_1
+  return strncmp(p, "for", 3) == 0 && !is_alnum(p[3]);
+}
+
 int get_variable_offset(char *p){
   int variable_length = 0;
   char *current_position = p;
@@ -145,6 +150,12 @@ Token *tokenize() {
     if(is_while(user_input)){
       cur = new_token(TK_WHILE, cur, user_input, 5);
       user_input+=5;
+      continue;
+    }
+
+    if(is_for(user_input)){
+      cur = new_token(TK_FOR, cur, user_input, 3);
+      user_input+=3;
       continue;
     }
 

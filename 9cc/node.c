@@ -1,5 +1,11 @@
 #include "9cc.h"
 
+bool consume(char *op, int token_kind);
+Token *consume_ident();
+void expect(char op);
+int expect_number();
+bool at_eof();
+
 // if next token is symbol, read next token and return true
 // otherwise return false
 bool consume(char *op, int token_kind) {
@@ -81,7 +87,7 @@ Node *stmt() {
     node->conditional = expr();
     expect(')');
     node->content = stmt();
-
+    
     if(consume("else", TK_ELSE)){
       node->kind = ND_ELSE;
       node->else_content = stmt();
@@ -91,11 +97,45 @@ Node *stmt() {
 
     return node;
   }else if(consume("while", TK_WHILE)){
+    node->kind = ND_WHILE;
     expect('(');
     node->conditional = expr();
     expect(')');
     node->content = stmt();
-    node->kind = ND_WHILE;
+    return node;
+  }else if(consume("for", TK_FOR)){
+    node->kind = ND_FOR;
+    expect('(');
+
+    // parse 'init' phase
+    // for(init; conditional; iter_expr)
+    if(!consume(";", TK_RESERVED)){
+      node->init = expr();
+      expect(';');
+    }else{
+      node->init = false;
+    }
+
+    // parse 'conditional' phase
+    // for(init; conditional; iter_expr)
+    if(!consume(";", TK_RESERVED)){
+      node->conditional = expr();
+      expect(';');
+    }else{
+      node->conditional = false;
+    }
+
+    // parse 'iter_expr' phase
+    // for(init; conditional; iter_expr)
+    if(!consume(")", TK_RESERVED)){
+      node->iter_expr = expr();
+      expect(')');
+    }else{
+      node->iter_expr = false;
+    }
+
+    node->content = stmt();
+
     return node;
   }else{
     node = expr();

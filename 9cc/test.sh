@@ -78,4 +78,10 @@ try 1 "if(1) 1; else 2;"
 try 1 "while(1 < 0) return 3; return 1;"
 try 5 "i = 0; while(5 > i) i = i + 1; return i;"
 
+# whether 'for parsing' works
+try 5 "test = 0; for(i=0; 5>i; i=i+1) test=test+1; return test;"
+try 5 "test = 0; for(;5>test;) test=test+1; return test;"
+try 5 "test = 0; for(i=0; ; i=i+1) if(i > 4) return i;"
+
+
 echo OK

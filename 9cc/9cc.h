@@ -18,6 +18,7 @@ typedef enum{
   TK_IF,         // if
   TK_ELSE,       // else
   TK_WHILE,      // while
+  TK_FOR,        // for
 } TokenKind;
 
 typedef struct Token Token;
@@ -71,6 +72,7 @@ typedef enum{
   ND_IF,     // if
   ND_ELSE,   // else
   ND_WHILE,  // while
+  ND_FOR,    // for
 } NodeKind;
 
 typedef struct Node Node;
@@ -82,9 +84,11 @@ struct Node{
   Node *rhs;          // right side
   int val;            // if kind is ND_NUM, only use
   int offset;         // if kind is ND_LVAR, only use
-  Node *conditional;  // if kind is ND_IF, only use
-  Node *content;      // if kind is ND_IF, only use
+  Node *conditional;  // if kind is ND_IF, ND_WHILE, ND_FOR only use
+  Node *content;      // if kind is ND_IF, ND_WHILE, ND_FOR only use
   Node *else_content; // if kind is ND_ELSE, only use
+  Node *init;         // if kind is ND_FOR
+  Node *iter_expr;    // if kind is ND_FOR
 };
 
 // proto type decration for Node
