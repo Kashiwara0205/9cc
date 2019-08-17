@@ -5,6 +5,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+// defined vector
+typedef struct Vector Vector;
+
+struct Vector{
+  void **data;  // array's data
+  int capacity; // array's capacity
+  int len;      // array's length
+};
+
+Vector *new_vec();
+void vec_push(Vector *vec, void *data_address);
+
 // for user input 
 extern char *user_input;
 
@@ -19,7 +31,8 @@ typedef enum{
   TK_ELSE,       // else
   TK_WHILE,      // while
   TK_FOR,        // for
-  TK_UNLESS      // unless
+  TK_UNLESS,     // unless
+  TK_BLOCK,      // { }
 } TokenKind;
 
 typedef struct Token Token;
@@ -56,26 +69,27 @@ extern LVar *locals;
 
 // defined syntax tree's node
 typedef enum{
-  ND_EQ,     // ==
-  ND_NOT_EQ, // !=
-  ND_LT,     // <
-  ND_LT_EQ,  // <=
-  ND_RT,     // >
-  ND_RT_EQ,  // >=
-  ND_ADD,    // +
-  ND_SUB,    // -
-  ND_MUL,    // *
-  ND_DIV,    // /
-  ND_ASSIGN, // =
-  ND_LVAR,   // local variable
-  ND_NUM,    // number
-  ND_RETURN, // return
-  ND_IF,     // if
-  ND_ELSE,   // else
-  ND_WHILE,  // while
-  ND_FOR,    // for
-  ND_UNLESS, // unless
+  ND_EQ,          // ==
+  ND_NOT_EQ,      // !=
+  ND_LT,          // <
+  ND_LT_EQ,       // <=
+  ND_RT,          // >
+  ND_RT_EQ,       // >=
+  ND_ADD,         // +
+  ND_SUB,         // -
+  ND_MUL,         // *
+  ND_DIV,         // /
+  ND_ASSIGN,      // =
+  ND_LVAR,        // local variable
+  ND_NUM,         // number
+  ND_RETURN,      // return
+  ND_IF,          // if
+  ND_ELSE,        // else
+  ND_WHILE,       // while
+  ND_FOR,         // for
+  ND_UNLESS,      // unless
   ND_UNLESS_ELSE, // else(unless)
+  ND_BLOCK        // { }
 } NodeKind;
 
 typedef struct Node Node;
@@ -92,6 +106,7 @@ struct Node{
   Node *else_content; // if kind is ND_ELSE, ND_UNLESS_ELSE, only use
   Node *init;         // if kind is ND_FOR
   Node *iter_expr;    // if kind is ND_FOR
+  Vector *stmts;      // if kind is ND_BLOK
 };
 
 // proto type decration for Node

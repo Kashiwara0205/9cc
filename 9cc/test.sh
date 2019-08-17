@@ -92,4 +92,15 @@ try 1 "unless(1 > 0) return 3; return 1;"
 try 2 "unless(1) 1; else 2;"
 try 1 "unless(0) 1; else 2;"
 
+# whether 'block `{ }` parsing' works
+try 1 "{ return 1; }"
+try 3 "
+  i = 5;
+  if(i > 0){
+    return 3;
+  }else{
+    return 1;
+  }
+"
+
 echo OK

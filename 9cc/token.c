@@ -90,6 +90,10 @@ bool is_unless(char *p){
   return strncmp(p, "unless", 6) == 0 && !is_alnum(p[6]);
 }
 
+bool is_block(char *p){
+  return  strncmp(p, "{", 1) == 0 || strncmp(p, "}", 1) == 0;
+}
+
 int get_variable_offset(char *p){
   int variable_length = 0;
   char *current_position = p;
@@ -170,7 +174,13 @@ Token *tokenize() {
       continue;
     }
 
-    if (is_lowercase_alpha(user_input)) {
+    if(is_block(user_input)){
+      cur = new_token(TK_BLOCK, cur, user_input, 1);
+      user_input+=1;
+      continue;
+    }
+
+    if(is_lowercase_alpha(user_input)) {
       // memo:
       // token structure, when register variable token
       // | hoge | = 1 

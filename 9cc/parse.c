@@ -1,11 +1,5 @@
 #include "9cc.h"
 
-bool consume(char *op, int token_kind);
-Token *consume_ident();
-void expect(char op);
-int expect_number();
-bool at_eof();
-
 // if next token is symbol, read next token and return true
 // otherwise return false
 bool consume(char *op, int token_kind) {
@@ -80,9 +74,7 @@ Node *new_node_num(int val){
 Node *stmt() {
   Node *node = calloc(1, sizeof(Node));
 
-  if(consume("return", TK_RETURN)){
-    node = new_node(ND_RETURN, NULL, expr());
-  }else if(consume("if", TK_IF)){
+  if(consume("if", TK_IF)){
     expect('(');
     node->conditional = expr();
     expect(')');
@@ -96,7 +88,9 @@ Node *stmt() {
     }
 
     return node;
-  }else if(consume("unless", TK_UNLESS)){
+  }
+  
+  if(consume("unless", TK_UNLESS)){
     expect('(');
     node->conditional = expr();
     expect(')');
@@ -110,14 +104,19 @@ Node *stmt() {
     }
 
     return node;
-  }else if(consume("while", TK_WHILE)){
+  }
+  
+  if(consume("while", TK_WHILE)){
     node->kind = ND_WHILE;
     expect('(');
     node->conditional = expr();
     expect(')');
     node->content = stmt();
+
     return node;
-  }else if(consume("for", TK_FOR)){
+  }
+
+  if(consume("for", TK_FOR)){
     node->kind = ND_FOR;
     expect('(');
 
@@ -151,6 +150,23 @@ Node *stmt() {
     node->content = stmt();
 
     return node;
+  }
+
+  if(consume("{", TK_BLOCK)){
+    Vector *vec = new_vec();
+    while (!consume("}", TK_BLOCK)) {
+      // use (void *) for convert data to address
+      vec_push(vec, (void *)stmt());
+    }
+
+    node->kind = ND_BLOCK;
+    node->stmts = vec;
+
+    return node;
+  }
+
+  if(consume("return", TK_RETURN)){
+    node = new_node(ND_RETURN, NULL, expr());
   }else{
     node = expr();
   }

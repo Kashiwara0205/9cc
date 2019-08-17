@@ -89,34 +89,32 @@ void gen(Node *node){
     lend_num+=1;
     return;
   case ND_FOR:
-
     if(node->init){
       gen(node->init);
     }
-
     printf(".Lbegin%d:\n", lbegin_num);
-
     if(node->conditional){
       gen(node->conditional);
       printf("  pop rax\n");
       printf("  cmp rax, 0\n");
       printf("  je .Lend%d\n", lend_num);
     }
-
     gen(node->content);
-
     if(node->iter_expr){
       gen(node->iter_expr);
     }
-
     printf("  jmp .Lbegin%d\n", lbegin_num);
-
     if(node->conditional){
       printf(".Lend%d:\n", lend_num);
     }
-
     lbegin_num+=1;
     lend_num+=1;
+    return;
+  case ND_BLOCK:
+    for (int i = 0; i < node->stmts->len; i++) {
+      gen((Node *)node->stmts->data[i]);
+      printf("  pop rax\n");
+    }
     return;
   case ND_RETURN:
     gen(node->rhs);
