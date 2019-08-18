@@ -35,7 +35,7 @@ char *expect_ident(){
   ident_token = token;
   token = token->next;
 
-  return strndup("main", 4);
+  return strndup(ident_token->str, ident_token->len);
 }
 
 // if next token is symbol, read next token
