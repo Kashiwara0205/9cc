@@ -1,5 +1,4 @@
 #include "9cc.h"
-
 // if next token is symbol, read next token and return true
 // otherwise return false
 bool consume(char *op, int token_kind) {
@@ -26,11 +25,30 @@ Token *consume_ident() {
   return ident_token;
 }
 
+// if next token is ident, read next token and return value's name
+// totherwise notice error
+char *expect_ident(){
+  if (token->kind != TK_IDENT)
+    error_at(token->str, "Not Ident");
+  Token *ident_token;
+  // copy ident_token address 
+  ident_token = token;
+  token = token->next;
+
+  return strndup("main", 4);
+}
+
 // if next token is symbol, read next token
 // otherwise notice error
 void expect(char op){
   if(token->kind != TK_RESERVED || token->str[0] != op)
     error("Not '%c'", op);
+  token = token->next;
+}
+
+void expect_block(char op){
+  if(token->kind != TK_BLOCK || token->str[0] != op)
+    error("Not BLOCK");
   token = token->next;
 }
 
@@ -69,6 +87,20 @@ Node *new_node_num(int val){
   node->kind = ND_NUM;
   node->val = val;
   return node;
+}
+
+Function *parse_function(){
+  Function *function = calloc(1, sizeof(Function));
+  function->name = expect_ident();
+  expect('(');
+  expect(')');
+  expect_block('{');
+  Vector *vec = new_vec();
+  while(!consume("}", TK_BLOCK)){
+    vec_push(vec, (void *)stmt());
+  }
+  function -> stmts = vec;
+  return function;
 }
 
 Node *stmt() {
@@ -287,7 +319,8 @@ Node *term() {
 
 void program() {
   int i = 0;
-  while (!at_eof())
-    code[i++] = stmt();
-  code[i] = NULL;
+  while (!at_eof()){
+    functions[i++] = parse_function();
+  }
+  functions[i] = NULL;
 }

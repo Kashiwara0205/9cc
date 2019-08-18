@@ -1,5 +1,21 @@
 #include "9cc.h"
 
+void gen_func(Function *function){
+  printf("%s:\n", function->name);
+  // prologue get 26 variable's area
+  printf("  push rbp\n");
+  printf("  mov rbp, rsp\n");
+  printf("  sub rsp, 208\n");
+  for (int i=0; i < function->stmts->len; i++){
+    gen((Node *)function->stmts->data[i]);
+    printf("  pop rax\n");
+  }
+  // epilogue
+  printf("  mov rsp, rbp\n");
+  printf("  pop rbp\n");
+  printf("  ret\n");
+}
+
 void gen_lval(Node *node) {
   if (node->kind != ND_LVAR)
     error("Left side is not variable");

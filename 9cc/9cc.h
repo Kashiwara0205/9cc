@@ -17,6 +17,16 @@ struct Vector{
 Vector *new_vec();
 void vec_push(Vector *vec, void *data_address);
 
+// defind function
+typedef struct Function Function;
+
+struct Function{
+  char *name;
+  Vector *stmts;
+};
+
+Function *parse_function();
+
 // for user input 
 extern char *user_input;
 
@@ -89,7 +99,8 @@ typedef enum{
   ND_FOR,         // for
   ND_UNLESS,      // unless
   ND_UNLESS_ELSE, // else(unless)
-  ND_BLOCK        // { }
+  ND_BLOCK,       // { }
+  ND_FUNC,        // xxxx()
 } NodeKind;
 
 typedef struct Node Node;
@@ -121,13 +132,15 @@ Node *assign();
 Node *stmt();
 
 void gen(Node *node);
+void gen_func(Function *function);
 
 // for error
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
 
 // Use one per semicolon
-// for example a; 1+1; → [0]: a [1]: 1+1
-Node *code[100];
+// for example: [ main(){return 1}; ]
+Function *functions[100];
+
 
 void program();

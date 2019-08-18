@@ -18,24 +18,10 @@ int main(int argc, char **argv){
 
   printf(".intel_syntax noprefix\n");
   printf(".global main\n");
-  printf("main:\n");
-
-  // prologue get 26 variable's area
-  printf("  push rbp\n");
-  printf("  mov rbp, rsp\n");
-  printf("  sub rsp, 208\n");
   
-  for (int i = 0; code[i]; i++) {
-    // use syntax tree to generate code
-    gen(code[i]);
-    printf("  pop rax\n");
+  for (int i = 0; functions[i]; i++) {
+    gen_func(functions[i]);
   }
-
-  // epilogue
-  printf("  mov rsp, rbp\n");
-  printf("  pop rbp\n");
-  printf("  ret\n");
-
 
   return 0;
 }
