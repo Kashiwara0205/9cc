@@ -100,24 +100,26 @@ typedef enum{
   ND_UNLESS,      // unless
   ND_UNLESS_ELSE, // else(unless)
   ND_BLOCK,       // { }
-  ND_FUNC,        // xxxx()
+  ND_FUNC_CALL,   // xxxx()
 } NodeKind;
 
 typedef struct Node Node;
 
 // node type
 struct Node{
-  NodeKind kind;      // node kind
-  Node *lhs;          // left side
-  Node *rhs;          // right side
-  int val;            // if kind is ND_NUM, only use
-  int offset;         // if kind is ND_LVAR, only use
-  Node *conditional;  // if kind is ND_IF, ND_WHILE, ND_FOR, ND_UNLESS only use
-  Node *content;      // if kind is ND_IF, ND_WHILE, ND_FOR, ND_UNLESS only use
-  Node *else_content; // if kind is ND_ELSE, ND_UNLESS_ELSE, only use
-  Node *init;         // if kind is ND_FOR
-  Node *iter_expr;    // if kind is ND_FOR
-  Vector *stmts;      // if kind is ND_BLOK
+  NodeKind kind;        // node kind
+  Node *lhs;            // left side
+  Node *rhs;            // right side
+  int val;              // if kind is ND_NUM, only use
+  int offset;           // if kind is ND_LVAR, only use
+  Node *conditional;    // if kind is ND_IF, ND_WHILE, ND_FOR, ND_UNLESS only use
+  Node *content;        // if kind is ND_IF, ND_WHILE, ND_FOR, ND_UNLESS only use
+  Node *else_content;   // if kind is ND_ELSE, ND_UNLESS_ELSE, only use
+  Node *init;           // if kind is ND_FOR
+  Node *iter_expr;      // if kind is ND_FOR
+  Vector *stmts;        // if kind is ND_BLOK
+  char *function_name;  // if kind is ND_FUNC_CALL
+  Vector *arguments;    // if kind is ND_FUNC_CALL
 };
 
 // proto type decration for Node
@@ -144,3 +146,4 @@ Function *functions[100];
 
 
 void program();
+

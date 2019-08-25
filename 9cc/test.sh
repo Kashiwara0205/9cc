@@ -4,10 +4,10 @@ try(){
   input="$2"
 
   ./9cc "$input" > tmp.s
-  gcc -o tmp tmp.s
+  gcc -o tmp tmp.s test_functions.o
   ./tmp
   actual="$?"
-
+  
   if [ "$actual" = "$expected" ]; then
     echo "$input => $actual"
   else
@@ -15,6 +15,9 @@ try(){
     exit 1
   fi
 }
+
+# whether 'simple number parsing' works
+try 0 "main(){ 0; }"
 
 # whether 'simple number parsing' works
 try 0 "main(){ 0; }"
@@ -104,4 +107,6 @@ main(){
 }
 "
 
+#  whether 'funcion call parsing' works
+try 1 "main(){ foo(); }"
 echo OK

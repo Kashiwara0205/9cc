@@ -74,6 +74,26 @@ LVar *find_lvar(Token *tok){
     return NULL;
 }
 
+LVar *gen_lvar(Token *ident_token, Node *node){
+  LVar *lvar = find_lvar(ident_token);
+  if (lvar) {
+    node->offset = lvar->offset;
+  } else {
+    // save local variable
+    lvar = calloc(1, sizeof(LVar));
+    lvar->next = locals;
+    lvar->name = ident_token->str;
+    lvar->len = ident_token->len;
+    if (locals == NULL){
+      lvar->offset = 8;
+    }else{
+      lvar->offset = locals->offset + 8;
+    }
+    node->offset = lvar->offset;
+    locals = lvar;
+  }
+}
+
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
   Node *node = calloc(1, sizeof(Node));
   node->kind = kind;
@@ -287,24 +307,18 @@ Node *term() {
   Token *tok = consume_ident();
   if (tok) {
     Node *node = calloc(1, sizeof(Node));
-    node->kind = ND_LVAR;
-    LVar *lvar = find_lvar(tok);
-    if (lvar) {
-      node->offset = lvar->offset;
-    } else {
-      // save local variable
-      lvar = calloc(1, sizeof(LVar));
-      lvar->next = locals;
-      lvar->name = tok->str;
-      lvar->len = tok->len;
-      if (locals == NULL){
-        lvar->offset = 8;
-      }else{
-        lvar->offset = locals->offset + 8;
-      }
-      node->offset = lvar->offset;
-      locals = lvar;
+
+    if(!consume("(", TK_RESERVED)){
+      node->kind = ND_LVAR;
+      gen_lvar(tok, node);
+    }else{
+      Vector *args = new_vec();
+      node->kind = ND_FUNC_CALL;
+      node->function_name = strndup(tok->str, tok->len);
+      node->arguments = args;
+      expect(')');
     }
+    
     return node;
   }
 
