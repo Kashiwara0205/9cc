@@ -94,6 +94,19 @@ LVar *gen_lvar(Token *ident_token, Node *node){
   }
 }
 
+Vector *get_arguments(){
+  if(consume(")", TK_RESERVED)){
+    return new_vec();
+  }else{
+    Vector *args = new_vec();
+    do {
+      vec_push(args, (void *)term());
+    }while(consume(",", TK_RESERVED));
+    expect(')');
+    return args;
+  }
+}
+
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
   Node *node = calloc(1, sizeof(Node));
   node->kind = kind;
@@ -312,11 +325,10 @@ Node *term() {
       node->kind = ND_LVAR;
       gen_lvar(tok, node);
     }else{
-      Vector *args = new_vec();
+      Vector *args = get_arguments();
       node->kind = ND_FUNC_CALL;
       node->function_name = strndup(tok->str, tok->len);
       node->arguments = args;
-      expect(')');
     }
     
     return node;

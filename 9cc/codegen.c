@@ -25,6 +25,23 @@ void gen_lval(Node *node) {
   printf("  push rax\n");
 }
 
+void gen_args(Node *node){
+  // Follow the Linux X86-64 calling convention
+  // First argument: RDI
+  // Second argument: RSI
+  // Third argument: RDX
+  // 4th argument: RCX
+  // 5th argument: R8
+  // 6th argument: R9
+  Vector *arguments = node->arguments;
+  char *registers[6] = {"RDI", "RSI", "RDX", "RCX", "R8", "R9"};
+  for(int i = 0; i < arguments->len; i++ ){
+    Node *term = (Node *)arguments->data[i];
+    gen(term);
+    printf("  pop %s\n", registers[i]);
+  }
+}
+
 int lbegin_num = 1;
 int lend_num = 1;
 int lelse_num = 1;
@@ -133,6 +150,7 @@ void gen(Node *node){
     }
     return;
   case ND_FUNC_CALL:
+    gen_args(node);
     printf("  call %s\n", node->function_name);
     printf("  push rax\n");
     return;
