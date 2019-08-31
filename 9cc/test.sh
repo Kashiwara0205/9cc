@@ -106,10 +106,14 @@ main(){
 }
 "
 
-#  whether 'funcion call parsing' works
+# whether 'funcion call parsing' works
 try 1 "main(){ foo(); }"
 try 5 "main(){ foo_with_arg(5); }"
 try 5 "main(){ foo_with_arg(5, 2); }"
 try 10 "main(){ sum(1, 2, 2, 1, 1, 3); }"
+
+#  whether 'defiend funcion' works
+try 1 "hoge(){ return 1; } main(){ return hoge(); }"
+try 5 "hoge(i){ return i; } main(){ return hoge(5); }"
 
 echo OK

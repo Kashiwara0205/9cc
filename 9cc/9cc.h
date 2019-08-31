@@ -22,6 +22,7 @@ typedef struct Function Function;
 
 struct Function{
   char *name;
+  Vector *arguments_name;
   Vector *stmts;
 };
 
@@ -144,6 +145,7 @@ void error_at(char *loc, char *fmt, ...);
 // for example: [ main(){return 1}; ]
 Function *functions[100];
 
+void gen_lval(Node *node);
 
 void program();
 

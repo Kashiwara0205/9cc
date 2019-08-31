@@ -1,11 +1,27 @@
 #include "9cc.h"
 
+// Follow the Linux X86-64 calling convention
+// First argument: RDI
+// Second argument: RSI
+// Third argument: RDX
+// 4th argument: RCX
+// 5th argument: R8
+// 6th argument: R9
+char *registers[6] = {"RDI", "RSI", "RDX", "RCX", "R8", "R9"};
+
 void gen_func(Function *function){
   printf("%s:\n", function->name);
   // prologue get 26 variable's area
   printf("  push rbp\n");
   printf("  mov rbp, rsp\n");
   printf("  sub rsp, 208\n");
+
+  for (int i=0; i < function->arguments_name->len; i++){
+    gen_lval((Node *)function->arguments_name->data[i]);
+    printf("  pop rax\n");
+    printf("  mov [rax], %s\n", registers[i]);
+  }
+  
   for (int i=0; i < function->stmts->len; i++){
     gen((Node *)function->stmts->data[i]);
     printf("  pop rax\n");
@@ -26,15 +42,7 @@ void gen_lval(Node *node) {
 }
 
 void gen_args(Node *node){
-  // Follow the Linux X86-64 calling convention
-  // First argument: RDI
-  // Second argument: RSI
-  // Third argument: RDX
-  // 4th argument: RCX
-  // 5th argument: R8
-  // 6th argument: R9
   Vector *arguments = node->arguments;
-  char *registers[6] = {"RDI", "RSI", "RDX", "RCX", "R8", "R9"};
   for(int i = 0; i < arguments->len; i++ ){
     Node *term = (Node *)arguments->data[i];
     gen(term);

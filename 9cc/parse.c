@@ -107,6 +107,23 @@ Vector *get_arguments(){
   }
 }
 
+Vector *get_function_arguments_name(){
+  if(consume(")", TK_RESERVED)){
+    return new_vec();
+  }else{
+    Vector *args = new_vec();
+    do {
+      Token *tok = consume_ident();
+      Node *node = calloc(1, sizeof(Node));
+      node->kind = ND_LVAR;
+      gen_lvar(tok, node);
+      vec_push(args, (void *)node);
+    }while(consume(",", TK_RESERVED));
+    expect(')');
+    return args;
+  }
+}
+
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
   Node *node = calloc(1, sizeof(Node));
   node->kind = kind;
@@ -126,7 +143,7 @@ Function *parse_function(){
   Function *function = calloc(1, sizeof(Function));
   function->name = expect_ident();
   expect('(');
-  expect(')');
+  function->arguments_name = get_function_arguments_name();
   expect_block('{');
   Vector *vec = new_vec();
   while(!consume("}", TK_BLOCK)){
@@ -322,9 +339,11 @@ Node *term() {
     Node *node = calloc(1, sizeof(Node));
 
     if(!consume("(", TK_RESERVED)){
+      // token is loacal variable
       node->kind = ND_LVAR;
       gen_lvar(tok, node);
     }else{
+      // token is function
       Vector *args = get_arguments();
       node->kind = ND_FUNC_CALL;
       node->function_name = strndup(tok->str, tok->len);
