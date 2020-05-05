@@ -1,5 +1,5 @@
 # 9cc
-[![Build Status](https://travis-ci.org/Kashiwara0205/C_Compiler.svg?branch=master)](https://travis-ci.org/Kashiwara0205/C_Compiler)
+[![Build Status](https://travis-ci.org/Kashiwara0205/9cc.svg?branch=master)](https://travis-ci.org/Kashiwara0205/9cc)
 
 This is C language compiler
 
