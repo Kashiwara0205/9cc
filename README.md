@@ -31,6 +31,6 @@ $ cd src
 $ make test
 ```
 
-## Reference page
+## 参考元
 [低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook)  
 [dekokunさんのgithub](https://github.com/dekokun/9cc)
